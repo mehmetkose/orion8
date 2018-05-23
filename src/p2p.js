@@ -1,4 +1,3 @@
-
 import WebSocket from 'ws'
 import blockchain from './blockchain'
 
@@ -78,14 +77,12 @@ class Server {
             'data': JSON.stringify([this.getLatestBlock()])
         }
     }
-
     write(ws, message){
         ws.send(JSON.stringify(message))
     }
     broadcast(message){
-        return this.peers.forEach(peer => write(peer, message))
+        return this.peers.forEach(peer => self.write(peer, message))
     }
-
     handleBlockchainResponse(message){
         var receivedBlocks = JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
         var latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
@@ -107,7 +104,6 @@ class Server {
             console.log('received blockchain is not longer than current blockchain. Do nothing');
         }
     };
-
     mineBlock(message) {
         var newBlock = this.generateNextBlock(JSON.parse(message.data));
         this.blockchain.addBlock(newBlock);
@@ -119,6 +115,5 @@ class Server {
         let nextIndex = previousBlock + 1;
         return new blockchain.Block(nextIndex, Date.now(), blockData)
     };
-
 }
 export default {Server}

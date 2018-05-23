@@ -1,4 +1,3 @@
-
 import SHA256 from 'crypto-js/sha256'
 
 class Block {
