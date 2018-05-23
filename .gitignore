@@ -1,5 +1,6 @@
 .DS_Store
+compile/
 node_modules
+coverage
+dist
 *.log
-*.lock
-dist/

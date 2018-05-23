@@ -1,65 +1,79 @@
 {
   "name": "orion",
-  "version": "0.0.2",
-  "description": "a blockchain for fupio",
-  "main": "dist",
-  "scripts": {
-    "dev": "nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
-    "build": "babel src -s -D -d dist --presets es2015,stage-0",
-    "clear": "mkdir -p dist && mkdir -p build && rm -rf dist/* && rm -rf build/*",
-    "start": "npm run clear && npm run build && node dist",
-    "compile": "#npm run -s build && nexe dist/ -o --build --clean build/build_${npm_package_version}",
-
-    "test": "jest --runInBand --verbose",
-    "coverage": "jest --coverage --runInBand --verbose",
-    "eslint": "eslint src/*.js --ignore-pattern \"node_modules/\"",
-    "release": "npm run -s build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
-  },
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "parserOptions": {
-      "ecmaVersion": 7,
-      "sourceType": "module"
-    },
-    "env": {
-      "node": true
-    },
-    "rules": {
-      "no-console": 0,
-      "no-unused-vars": 1
-    }
-  },
-  "repository": "mehmetkose/orion",
-  "author": "Mehmet Kose <mehmetkose122@gmail.com>",
+  "version": "0.0.1",
+  "description": "A blockchain database for BlockStack projects to keep relations on a trustable network which uses Websockets for p2p communication. ",
   "license": "MIT",
-  "eslintConfig": {
-    "plugins": ["node", "jest"],
-    "extends": ["eslint:recommended", "plugin:node/recommended"],
-    "rules": {
-      "node/no-unsupported-features": 0
-    },
-    "env": {
-      "jest/globals": true,
-      "node": true,
-      "es6": true
-    },
-    "parserOptions": {
-      "sourceType": "module",
-      "ecmaVersion": 2018
-    }
+  "repository": "mehmetkose/orion",
+  "main": "dist/index.js",
+  "author": {
+    "name": "Mehmet Kose",
+    "email": "mehmetkose122@gmail.com",
+    "url": "https://github.com/mehmetkose"
   },
+  "engines": {
+    "node": ">=6"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "jest",
+    "coverage": "npm test -- --coverage",
+    "postcoverage": "opn coverage/lcov-report/index.html",
+    "lint": "eslint src test",
+    "flow": "flow check",
+    "docs": "documentation readme src --section=API",
+    "clean": "rimraf dist",
+    "flowbuild": "flow-copy-source src dist",
+    "prebuild": "npm run docs && npm run clean && npm run flowbuild",
+    "build": "babel src -d dist",
+    "watch": "npm-watch",
+    "patch": "npm version patch && npm publish",
+    "minor": "npm version minor && npm publish",
+    "major": "npm version major && npm publish",
+    "prepublishOnly": "npm run lint && npm test && npm run build",
+    "postpublish": "git push origin master --follow-tags",
+    "compile": "npm run clean && npm run -s build && nexe dist/ -o compile/${npm_package_name}_${npm_package_version}"
+  },
+  "watch": {
+    "test": "{src,test}/*.js",
+    "lint": "{src,test}/*.js",
+    "build": "src"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "keywords": [
+    "orion"
+  ],
   "dependencies": {
+    "colors": "^1.3.0",
+    "commander": "^2.15.1",
     "crypto-js": "^3.1.9-1",
     "ws": "^5.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.9.0",
-    "babel-core": "^6.9.0",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "eslint": "^3.1.1",
-    "jest": "^22.4.4",
-    "jest-cli": "^22.4.4",
-    "nodemon": "^1.9.2"
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-jest": "^22.4.3",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "documentation": "^6.1.0",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "eslint-plugin-flowtype-errors": "^3.5.1",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "flow-bin": "^0.69.0",
+    "flow-copy-source": "^1.3.0",
+    "jest-cli": "^22.4.3",
+    "npm-watch": "^0.3.0",
+    "opn-cli": "^3.1.0",
+    "prettier": "^1.11.1",
+    "rimraf": "^2.6.2"
   }
 }

@@ -1,7 +1,7 @@
 import SHA256 from 'crypto-js/sha256'
 
 class Block {
-    constructor(index, timestamp, data, previousHash = '') {
+    constructor(index, timestamp, data, previousHash) {
         this.index = index
         this.timestamp = timestamp
         this.previousHash = previousHash
@@ -17,13 +17,13 @@ class Chain {
     constructor() {
         this.chain = [this.createGenesisBlock()]
     }
-    createGenesisBlock(){
+    createGenesisBlock() {
         return new Block(0, Date.now(), "Genesis Block", "0")
     }
-    getLatestBlock(){
+    getLatestBlock() {
         return this.chain[this.chain.length - 1]
     }
-    addBlock(newBlock){
+    addBlock(newBlock) {
         newBlock.previousHash = this.getLatestBlock().hash
         newBlock.hash = newBlock.calculateHash()
         this.chain.push(newBlock)
@@ -45,4 +45,4 @@ class Chain {
     }
 }
 
-export default {Block, Chain}
+export default { Block, Chain }
