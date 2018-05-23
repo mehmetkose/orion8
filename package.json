@@ -8,8 +8,12 @@
     "build": "babel src -s -D -d dist --presets es2015,stage-0",
     "clear": "mkdir -p dist && mkdir -p build && rm -rf dist/* && rm -rf build/*",
     "start": "npm run clear && npm run build && node dist",
-    "compile": "npm run -s build && nexe dist/ -o --build --clean build/build_${npm_package_version}",
-    "test": "eslint src"
+    "compile": "#npm run -s build && nexe dist/ -o --build --clean build/build_${npm_package_version}",
+
+    "test": "jest --runInBand --verbose",
+    "coverage": "jest --coverage --runInBand --verbose",
+    "eslint": "eslint src/*.js --ignore-pattern \"node_modules/\"",
+    "release": "npm run -s build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "eslintConfig": {
     "extends": "eslint:recommended",
@@ -28,6 +32,22 @@
   "repository": "mehmetkose/orion",
   "author": "Mehmet Kose <mehmetkose122@gmail.com>",
   "license": "MIT",
+  "eslintConfig": {
+    "plugins": ["node", "jest"],
+    "extends": ["eslint:recommended", "plugin:node/recommended"],
+    "rules": {
+      "node/no-unsupported-features": 0
+    },
+    "env": {
+      "jest/globals": true,
+      "node": true,
+      "es6": true
+    },
+    "parserOptions": {
+      "sourceType": "module",
+      "ecmaVersion": 2018
+    }
+  },
   "dependencies": {
     "crypto-js": "^3.1.9-1",
     "ws": "^5.2.0"
@@ -38,6 +58,8 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-0": "^6.5.0",
     "eslint": "^3.1.1",
+    "jest": "^22.4.4",
+    "jest-cli": "^22.4.4",
     "nodemon": "^1.9.2"
   }
 }

@@ -111,8 +111,7 @@ class Server {
         console.log('block added: ' + JSON.stringify(newBlock));
     }
     generateNextBlock(blockData){
-        let previousBlock = this.blockchain.getLatestBlock()
-        let nextIndex = previousBlock + 1;
+        let nextIndex = this.blockchain.getLatestBlock() + 1
         return new blockchain.Block(nextIndex, Date.now(), blockData)
     };
 }
