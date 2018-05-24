@@ -106,11 +106,20 @@ class Server {
     }
   }
   mineBlock(message) {
-    const newBlock = this.generateNextBlock(JSON.parse(message.data));
-    this.blockchain.addBlock(newBlock);
-    this.broadcast(this.responseLatestMsg());
-    console.log("block added: ");
-    console.log(JSON.stringify(newBlock));
+    var messageObject;
+    try {
+      messageObject = JSON.parse(message);
+    } catch (e) {
+      return console.error(e);
+    }
+    if(message !== null && typeof messageObject === 'object') {
+      const newBlock = this.generateNextBlock(messageObject);
+      this.blockchain.addBlock(newBlock);
+      this.broadcast(this.responseLatestMsg());
+      console.log("block added: ");
+      console.log(JSON.stringify(newBlock));
+    }
+    
   }
   generateNextBlock(blockData) {
     const previousBlock = this.blockchain.getLatestBlock();

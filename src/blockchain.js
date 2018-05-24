@@ -1,18 +1,18 @@
 import SHA256 from "crypto-js/sha256";
 
 class Block {
-  constructor(index, timestamp, data, previousHash) {
+  constructor(index, timestamp, previousHash, data) {
     this.index = index;
     this.timestamp = timestamp;
     this.previousHash = previousHash;
-    this.hash = this.calculateHash();
     this.data = data;
+    this.hash = this.calculateHash();
   }
   calculateHash() {
     return SHA256(
-      this.index +
-        this.previousHash +
+        this.index +
         this.timestamp +
+        this.previousHash +
         JSON.stringify(this.data)
     ).toString();
   }
@@ -23,7 +23,7 @@ class Chain {
     this.chain = [this.createGenesisBlock()];
   }
   createGenesisBlock() {
-    return new Block(0, Date.now(), "Genesis Block", "0");
+    return new Block(0, Date.now(), "0", "Genesis Block");
   }
   getLatestBlock() {
     return this.chain[this.chain.length - 1];
@@ -34,6 +34,18 @@ class Chain {
     this.chain.push(newBlock);
   }
   isChainValid() {
+    // return this.chain.reduce((prev, cur) => {
+    //   console.log(prev.hash, cur.calculateHash)
+    //   if (prev.index +1 !== cur.index) {
+    //     return false
+    //   } else if (cur.hash !== cur.calculateHash()) {
+    //     return false
+    //   } else if (cur.previousHash !== prev.hash){
+    //     return false
+    //   }
+    //   return true;
+    // })
+
     for (let i = 1; i < this.chain.length; i++) {
       const currentBlock = this.chain[i];
       const previousBlock = this.chain[i - 1];
