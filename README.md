@@ -12,7 +12,17 @@ yarn
 
 ## Development Mode
 
+For development purposes, you could consider open two tab on your terminal.
+
+#### Watch the tests, lintings and beautifiers.
+
+```console
+yarn watch
+```
+#### Run the livereload server
+```console
 yarn dev
+```
 
 ## Build the Source
 
