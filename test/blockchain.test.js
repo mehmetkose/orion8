@@ -3,9 +3,6 @@ import blockchain from "../src/blockchain";
 describe("Test Chain", () => {
   const testChain = new blockchain.Chain();
 
-  // const block2 = new blockchain.Block(2, Date.now(), testChain.getLatestBlock().previousHash, { hello: "world3" })
-  // testChain.addBlock(block2);
-
   it("chain valid", () => {
     expect(testChain).toBeDefined();
     expect(testChain.isChainValid()).toBe(true);
@@ -16,12 +13,12 @@ describe("Test Chain", () => {
     expect(testChain.createGenesisBlock().index).toBe(0);
   });
 
-  it("genesis block data must be equal to \"Genesis Block\"", () => {
+  it('genesis block data must be equal to "Genesis Block"', () => {
     expect(testChain).toBeDefined();
     expect(testChain.createGenesisBlock().data).toBe("Genesis Block");
   });
 
-  it("genesis block previousHash must be equal to \"0\"", () => {
+  it('genesis block previousHash must be equal to "0"', () => {
     expect(testChain).toBeDefined();
     expect(testChain.createGenesisBlock().previousHash).toBe("0");
   });
@@ -36,17 +33,25 @@ describe("Test Chain", () => {
   });
 
   it("first block must be added", () => {
-    const block1 = new blockchain.Block(1, Date.now(), testChain.getLatestBlock().previousHash, { hello: "world2" });
+    const block1 = new blockchain.Block(
+      1,
+      Date.now(),
+      testChain.getLatestBlock().previousHash,
+      { hello: "world2" }
+    );
     testChain.addBlock(block1);
-    
     expect(testChain).toBeDefined();
     expect(testChain.chain.length).toBe(2);
   });
 
   it("second block must be added", () => {
-    const block2 = new blockchain.Block(2, Date.now(), testChain.getLatestBlock().previousHash, { hello: "world3" });
+    const block2 = new blockchain.Block(
+      2,
+      Date.now(),
+      testChain.getLatestBlock().previousHash,
+      { hello: "world3" }
+    );
     testChain.addBlock(block2);
-    
     expect(testChain).toBeDefined();
     expect(testChain.chain.length).toBe(3);
   });
@@ -54,7 +59,6 @@ describe("Test Chain", () => {
   it("last 2 block index must be equal", () => {
     const latest = testChain.chain[testChain.chain.length - 1];
     const lastButOne = testChain.chain[testChain.chain.length - 2];
-    
     expect(testChain).toBeDefined();
     expect(lastButOne.index + 1).toBe(latest.index);
   });
@@ -68,27 +72,28 @@ describe("Test Chain", () => {
   it("last block hash must be string", () => {
     const latest = testChain.chain[testChain.chain.length - 1];
     expect(testChain).toBeDefined();
-    expect(typeof latest.hash).toBe('string');
+    expect(typeof latest.hash).toBe("string");
   });
 
   it("last 2 block hashes must be reference each other", () => {
     const latest = testChain.chain[testChain.chain.length - 1];
     const lastButOne = testChain.chain[testChain.chain.length - 2];
-    
     expect(testChain).toBeDefined();
     expect(latest.previousHash).toBe(lastButOne.hash);
   });
 
   it("chain must with be invalid with the wrong index", () => {
-    const wrongBlock = new blockchain.Block(12, Date.now(), testChain.getLatestBlock().previousHash, { hello: "world2" });
+    const wrongBlock = new blockchain.Block(
+      12,
+      Date.now(),
+      testChain.getLatestBlock().previousHash,
+      { hello: "world2" }
+    );
     testChain.addBlock(wrongBlock);
-    
     expect(testChain).toBeDefined();
     expect(testChain.chain.length).toBe(4);
     expect(testChain.isChainValid()).toBe(false);
     testChain.chain.pop();
     expect(testChain.chain.length).toBe(3);
   });
-
-
 });

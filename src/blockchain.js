@@ -10,7 +10,7 @@ class Block {
   }
   calculateHash() {
     return SHA256(
-        this.index +
+      this.index +
         this.timestamp +
         this.previousHash +
         JSON.stringify(this.data)
@@ -34,19 +34,7 @@ class Chain {
     this.chain.push(newBlock);
   }
   isChainValid() {
-    // return this.chain.reduce((prev, cur) => {
-    //   console.log(prev.hash, cur.calculateHash)
-    //   if (prev.index +1 !== cur.index) {
-    //     return false
-    //   } else if (cur.hash !== cur.calculateHash()) {
-    //     return false
-    //   } else if (cur.previousHash !== prev.hash){
-    //     return false
-    //   }
-    //   return true;
-    // })
-
-    for (let i = 1; i < this.chain.length; i++) {
+    for (let i = 1; i < this.chain.length; i += 1) {
       const currentBlock = this.chain[i];
       const previousBlock = this.chain[i - 1];
 

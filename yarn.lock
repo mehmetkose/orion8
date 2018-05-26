@@ -3765,6 +3765,10 @@ lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.2.0, l
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
+log@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/log/-/log-1.4.0.tgz#4ba1d890fde249b031dca03bc37eaaf325656f1c"
+
 longest-streak@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/longest-streak/-/longest-streak-2.0.2.tgz#2421b6ba939a443bb9ffebf596585a50b4c38e2e"
@@ -4002,6 +4006,10 @@ mixin-deep@^1.2.0:
   dependencies:
     minimist "0.0.8"
 
+mock-socket@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/mock-socket/-/mock-socket-7.1.0.tgz#482ecccafb0f0e86b8905ba2aa57c1fe73ba262d"
+
 module-deps-sortable@4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/module-deps-sortable/-/module-deps-sortable-4.0.6.tgz#1251a4ba2c44a92df6989bd029da121a4f2109b0"
@@ -4086,6 +4094,21 @@ node-pre-gyp@^0.6.39:
 nodemon@^1.12.1:
   version "1.17.2"
   resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.17.2.tgz#17c0062629610e03dd01241c576f1c4068da9fdd"
+  dependencies:
+    chokidar "^2.0.2"
+    debug "^3.1.0"
+    ignore-by-default "^1.0.1"
+    minimatch "^3.0.4"
+    pstree.remy "^1.1.0"
+    semver "^5.5.0"
+    supports-color "^5.2.0"
+    touch "^3.1.0"
+    undefsafe "^2.0.2"
+    update-notifier "^2.3.0"
+
+nodemon@^1.17.5:
+  version "1.17.5"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.17.5.tgz#e6a665c872fdf09d48bf2a81f3e85f8cfb39322a"
   dependencies:
     chokidar "^2.0.2"
     debug "^3.1.0"
@@ -5229,6 +5252,10 @@ sntp@2.x.x:
   resolved "https://registry.yarnpkg.com/sntp/-/sntp-2.1.0.tgz#2c6cec14fedc2222739caf9b5c3d85d1cc5a2cc8"
   dependencies:
     hoek "4.x.x"
+
+sockette@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/sockette/-/sockette-2.0.0.tgz#3da2f3459288d55cedcb6de580aeae68ae4554fc"
 
 source-map-resolve@^0.5.0:
   version "0.5.1"

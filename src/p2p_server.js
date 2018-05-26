@@ -1,9 +1,11 @@
 import WebSocket from "ws";
-
-import blockchain from "./blockchain";
 import messageType from "./types";
 
-class Server {
+import Log from "log";
+
+const log = new Log("info");
+
+class PeerToPeerServer {
   constructor(blockchainInstance) {
     this.peers = [];
     this.blockchain = blockchainInstance;
@@ -23,22 +25,30 @@ class Server {
       try {
         const message = JSON.parse(data);
         console.log(`Received message: ${JSON.stringify(message)}`);
-        switch (message.type) {
-          case messageType.QUERY_LATEST:
-            this.write(ws, this.responseLatestMsg());
-            break;
-          case messageType.QUERY_ALL:
-            this.write(ws, this.responseChainMsg());
-            break;
-          case messageType.RESPONSE_BLOCKCHAIN:
-            this.handleBlockchainResponse(message);
-            break;
-          case messageType.MINE_BLOCK:
-            this.mineBlock(message);
-            break;
-        }
       } catch (error) {
+        console.log(error);
         console.log("parsing error");
+      }
+      switch (message.type) {
+        case messageType.QUERY_LATEST:
+          console.log(messageType.QUERY_LATEST);
+          this.write(ws, this.responseLatestMsg());
+          break;
+        case messageType.QUERY_ALL:
+          console.log(messageType.QUERY_ALL);
+          this.write(ws, this.responseChainMsg());
+          break;
+        case messageType.RESPONSE_BLOCKCHAIN:
+          console.log(messageType.RESPONSE_BLOCKCHAIN);
+          this.handleBlockchainResponse(message);
+          break;
+        case messageType.MINE_BLOCK:
+          console.log(messageType.RESPONSE_BLOCKCHAIN);
+          this.mineBlock(message);
+          break;
+        default:
+          console.log("PONG geldi !");
+          this.write(ws, { type: messageType.PONG });
       }
     });
   }
@@ -49,9 +59,6 @@ class Server {
   closeConnection(ws) {
     console.log(`connection failed to peer: ${ws.url}`);
     this.peers.splice(this.peers.indexOf(ws), 1);
-  }
-  getLatestBlock() {
-    return this.blockchain[this.blockchain.length - 1];
   }
   queryChainLengthMsg() {
     return { type: messageType.QUERY_LATEST };
@@ -68,7 +75,7 @@ class Server {
   responseLatestMsg() {
     return {
       type: messageType.RESPONSE_BLOCKCHAIN,
-      data: JSON.stringify([this.getLatestBlock()])
+      data: JSON.stringify([this.blockchain.getLatestBlock()])
     };
   }
   write(ws, message) {
@@ -82,7 +89,7 @@ class Server {
       (b1, b2) => b1.index - b2.index
     );
     const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
-    const latestBlockHeld = this.getLatestBlock();
+    const latestBlockHeld = this.blockchain.getLatestBlock();
     if (latestBlockReceived.index > latestBlockHeld.index) {
       console.log(
         `blockchain possibly behind. We got: ${latestBlockHeld.index} 
@@ -106,20 +113,20 @@ class Server {
     }
   }
   mineBlock(message) {
-    var messageObject;
+    let messageObject;
     try {
       messageObject = JSON.parse(message);
     } catch (e) {
       return console.error(e);
     }
-    if(message !== null && typeof messageObject === 'object') {
+    if (message !== null && typeof messageObject === "object") {
       const newBlock = this.generateNextBlock(messageObject);
       this.blockchain.addBlock(newBlock);
       this.broadcast(this.responseLatestMsg());
       console.log("block added: ");
       console.log(JSON.stringify(newBlock));
     }
-    
+    return messageObject;
   }
   generateNextBlock(blockData) {
     const previousBlock = this.blockchain.getLatestBlock();
@@ -129,4 +136,4 @@ class Server {
     return new blockchain.Block(index, timestamp, previousHash, blockData);
   }
 }
-export default { Server };
+export default PeerToPeerServer;
