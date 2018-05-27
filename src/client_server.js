@@ -5,19 +5,19 @@ const log = new Log("info");
 
 class ClientServer {
   constructor(blockchainInstance) {
-    this.peers = [];
+    this.clients = [];
     this.blockchain = blockchainInstance;
   }
   startServer(port) {
     const server = new WebSocket.Server({ port });
     server.on("connection", ws => this.initConnection(ws));
   }
-  initConnection(ws) {
-    this.peers.push(ws);
+  initConnection = ws => {
+    this.clients.push(ws);
     this.initMessageHandler(ws);
     this.initErrorHandler(ws);
-  }
-  initMessageHandler(ws) {
+  };
+  initMessageHandler = ws => {
     ws.on("message", data => {
       try {
         const message = JSON.parse(data);
@@ -37,20 +37,18 @@ class ClientServer {
         log.info("parsing error");
       }
     });
-  }
-  initErrorHandler(ws) {
+  };
+  initErrorHandler = ws => {
     ws.on("close", () => this.closeConnection(ws));
     ws.on("error", () => this.closeConnection(ws));
-  }
-  closeConnection(ws) {
-    this.peers.splice(this.peers.indexOf(ws), 1);
-  }
-  responseChainMsg() {
-    return {
-      type: "get_blockchain",
-      data: JSON.stringify(this.blockchain)
-    };
-  }
+  };
+  closeConnection = ws => {
+    this.clients.splice(this.clients.indexOf(ws), 1);
+  };
+  responseChainMsg = () => ({
+    type: "get_blockchain",
+    data: JSON.stringify(this.blockchain)
+  });
   ship = (ws, message) => {
     ws.send(JSON.stringify(message));
   };

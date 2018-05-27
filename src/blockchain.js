@@ -22,16 +22,13 @@ class Chain {
   constructor() {
     this.chain = [this.createGenesisBlock()];
   }
-  createGenesisBlock() {
-    return new Block(0, Date.now(), "0", "Genesis Block");
-  }
-  getLatestBlock() {
-    return this.chain[this.chain.length - 1];
-  }
+  createGenesisBlock = () => new Block(0, Date.now(), "0", "Genesis Block");
+  getLatestBlock = () => this.chain[this.chain.length - 1];
   addBlock(newBlock) {
-    newBlock.previousHash = this.getLatestBlock().hash;
-    newBlock.hash = newBlock.calculateHash();
-    this.chain.push(newBlock);
+    const block = newBlock;
+    block.previousHash = this.getLatestBlock().hash;
+    block.hash = block.calculateHash();
+    this.chain.push(block);
   }
   isChainValid() {
     for (let i = 1; i < this.chain.length; i += 1) {

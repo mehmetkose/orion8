@@ -19,7 +19,9 @@ For development purposes, you could consider open two tab on your terminal.
 ```console
 yarn watch
 ```
+
 #### Run the livereload server
+
 ```console
 yarn dev
 ```
