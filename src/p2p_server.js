@@ -19,7 +19,7 @@ class PeerToPeerServer {
     this.peers.push(ws);
     this.initMessageHandler(ws);
     this.initErrorHandler(ws);
-    this.write(ws, this.queryChainLengthMsg());
+    this.ship(ws, this.queryChainLengthMsg());
   };
   initMessageHandler = ws => {
     ws.on("message", data => {
@@ -29,11 +29,11 @@ class PeerToPeerServer {
         switch (message.type) {
           case messageType.QUERY_LATEST:
             log.info(messageType.QUERY_LATEST);
-            this.write(ws, this.responseLatestMsg());
+            this.ship(ws, this.responseLatestMsg());
             break;
           case messageType.QUERY_ALL:
             log.info(messageType.QUERY_ALL);
-            this.write(ws, this.responseChainMsg());
+            this.ship(ws, this.responseChainMsg());
             break;
           case messageType.RESPONSE_BLOCKCHAIN:
             log.info(messageType.RESPONSE_BLOCKCHAIN);
@@ -45,7 +45,7 @@ class PeerToPeerServer {
             break;
           default:
             log.info("PONG geldi !");
-            this.write(ws, { type: messageType.PONG });
+            this.ship(ws, { type: messageType.PONG });
         }
       } catch (error) {
         log.info(error);
@@ -83,10 +83,10 @@ class PeerToPeerServer {
     };
     return response;
   };
-  write = (ws, message) => {
+  ship = (ws, message) => {
     ws.send(JSON.stringify(message));
   };
-  broadcast = message => this.peers.forEach(peer => this.write(peer, message));
+  broadcast = message => this.peers.forEach(peer => this.ship(peer, message));
   handleBlockchainResponse = message => {
     const receivedBlocks = JSON.parse(message.data).sort(
       (b1, b2) => b1.index - b2.index
