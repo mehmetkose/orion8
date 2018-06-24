@@ -1,4 +1,5 @@
 import SHA256 from "crypto-js/sha256";
+import jsonfile from "jsonfile";
 
 class Block {
   constructor(index, timestamp, previousHash, data) {
@@ -8,7 +9,7 @@ class Block {
     this.data = data;
     this.hash = this.calculateHash();
   }
-  calculateHash() {
+  calculateHash = () => {
     return SHA256(
       this.index +
         this.timestamp +
@@ -19,22 +20,61 @@ class Block {
 }
 
 class Chain {
-  constructor() {
-    this.chain = [this.createGenesisBlock()];
+  constructor(chainDir) {
+    this.fileName = `${chainDir}/blockchain.db`;
+    this.latestBlock = this.setupDatabase();
   }
-  createGenesisBlock = () => new Block(0, Date.now(), "0", "Genesis Block");
-  getLatestBlock = () => this.chain[this.chain.length - 1];
-  addBlock(newBlock) {
-    const block = newBlock;
-    block.previousHash = this.getLatestBlock().hash;
-    block.hash = block.calculateHash();
-    this.chain.push(block);
+  setupDatabase = () => {
+    const schema = {
+      chain: [this.createGenesisBlock()],
+      cache: {}
+    };
+    try {
+      const database = jsonfile.readFileSync(this.fileName);
+      return database.chain[database.chain.length - 1];
+    } catch (error) {
+      if (error.errno == -2) {
+        jsonfile.writeFileSync(this.fileName, schema);
+      }
+      return schema.chain[0];
+    }
   }
+  createBlock = (index, timestamp, previousHash, data) => {
+    return new Block(index, timestamp, previousHash, data);
+  };
+  createGenesisBlock = () => this.createBlock(0, Date.now(), "0", {type: "genesis", data: {}});
+  addBlock = (newBlock) => {
+    const database = jsonfile.readFileSync(this.fileName);
+    database.chain.push(newBlock);
+    jsonfile.writeFileSync(this.fileName, database);
+    this.latestBlock = database.chain[database.chain.length -1];
+    return true;
+  };
+  getBlockChain = () => {
+    const database = jsonfile.readFileSync(this.fileName);
+    return database.chain;
+  }
+  generateNextBlock = blockData => {
+    const index = this.latestBlock.index + 1;
+    const timestamp = Date.now();
+    const previousHash = this.latestBlock.hash;
+    return new Block(index, timestamp, previousHash, blockData);
+  };
   isChainValid() {
-    for (let i = 1; i < this.chain.length; i += 1) {
-      const currentBlock = this.chain[i];
-      const previousBlock = this.chain[i - 1];
-
+    const database = jsonfile.readFileSync(this.fileName);
+    for (let i = 1; i < database.chain.length; i += 1) {
+      const currentBlock = this.createBlock(
+        database.chain[i].index,
+        database.chain[i].timestamp,
+        database.chain[i].previousHash,
+        database.chain[i].data
+      );
+      const previousBlock = this.createBlock(
+        database.chain[i - 1].index,
+        database.chain[i - 1].timestamp,
+        database.chain[i - 1].previousHash,
+        database.chain[i - 1].data
+      );
       if (previousBlock.index + 1 !== currentBlock.index) {
         return false;
       } else if (currentBlock.hash !== currentBlock.calculateHash()) {

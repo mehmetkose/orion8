@@ -1,9 +1,10 @@
+import fs from "fs";
+import os from "os";
 import program from "commander";
 import colors from "colors";
 import Log from "log";
 
 import blockchain from "./blockchain";
-// import PeerToPeerServer from "./p2p_server";
 import ClientServer from "./client_server";
 
 const log = new Log("info");
@@ -15,12 +16,9 @@ program.version("0.1.0");
 program.parse(process.argv);
 
 if (program.run) {
-  const orionChain = new blockchain.Chain();
-
-  // const p2pWebsocketServer = new PeerToPeerServer(orionChain);
-  // p2pWebsocketServer.startServer(program.p2p_port);
-  // log.info(`listening websocket p2p port on: ${program.p2p_port}`);
-
+  const chainDir =  `${os.homedir()}/.orion8`;
+  !fs.existsSync(chainDir) && fs.mkdirSync(chainDir);
+  const orionChain = new blockchain.Chain(chainDir);
   const clientWebsocketServer = new ClientServer(orionChain);
   clientWebsocketServer.startServer(program.client_port);
   log.info(`listening client ws server port on: ${program.client_port}`);
