@@ -51,6 +51,7 @@
     "orion8"
   ],
   "dependencies": {
+    "arr-includes": "fupio/arr-includes",
     "colors": "^1.3.0",
     "commander": "^2.15.1",
     "crypto-js": "^3.1.9-1",

@@ -1,7 +1,8 @@
 import WebSocket from "ws";
 import Log from "log";
 import UrlParser from "url-parse";
-import { decodeToken, TokenVerifier } from "jsontokens";
+import { decodeToken /* TokenVerifier */ } from "jsontokens";
+import arrIncludes from "arr-includes";
 
 const log = new Log("info");
 
@@ -24,7 +25,6 @@ class ClientServer {
     const pieces = publicKey.split(":");
     if (pieces.length > 1) {
       const client = {
-        // id: req.headers['sec-websocket-key'],
         id: pieces[pieces.length - 1],
         blockstack: pieces[pieces.length - 1],
         isAuthenticated: true,
@@ -150,36 +150,40 @@ class ClientServer {
             this.subscriptions.get(tag).add(client.id);
             break;
           }
+          case "unfollow_tag": {
+            const tag = message.data.name.toLowerCase().trim();
+            if (!this.subscriptions.has(tag)) {
+              this.subscriptions.delete(tag);
+            }
+            break;
+          }
           case "load_feeds": {
-            // gönderilen feedlerin idlerini bir yere topla,
-            const sentFeedIDs = [];
+            let sentFeedIDs = [];
             const askedTags = message.data.tags;
             const chain = this.blockchain.getBlockChain();
             chain.map(block => {
               if (block.data.hasOwnProperty("tags") && block.index !== 0) {
-                block.data.tags.map(blockTag => {
-                  askedTags.map(askedTag => {
-                    if (blockTag.toLowerCase() == askedTag.toLowerCase()) {
-                      const feed = {
-                        username: block.data.username,
-                        identity: block.data.identity,
-                        tags: this.unique(block.data.tags),
-                        created: block.data.created,
-                        updated: block.data.created
-                      };
-                      this.ship(this.clients.get(client.id).connection, {
-                        type: "feed_load_promise",
-                        data: feed
-                      });
-                      const feedID = `${feed.created}-${feed.identity}`;
-                      sentFeedIDs.push(feedID);
-                    }
-                  });
-                });
+                if (arrIncludes(block.data.tags, askedTags) !== false) {
+                  const feed = {
+                    username: block.data.username,
+                    identity: block.data.identity,
+                    tags: this.unique(block.data.tags),
+                    created: block.data.created,
+                    updated: block.data.created
+                  };
+                  const checkClient = this.clients.get(client.id);
+                  if (checkClient) {
+                    this.ship(checkClient.connection, {
+                      type: "feed_load_promise",
+                      data: feed
+                    });
+                    sentFeedIDs.push(`${feed.created}-${feed.identity}`)
+                  }
+                }
               }
             });
-
-            // yüklenen feedleri client takip etmeli
+            // kullanıcı feed idlerini de etiket olarak takip etmeli
+            // TODO: burada feedkey başına feed:{feedKey} eklenebilir.
             sentFeedIDs.forEach(feedKey => {
               if (!this.subscriptions.has(feedKey)) {
                 this.subscriptions.set(feedKey, new Set());
@@ -187,23 +191,24 @@ class ClientServer {
               this.subscriptions.get(feedKey).add(client.id);
             });
             // chain'i tekrar tarayıp commentleri yolla.
-            console.log(sentFeedIDs)
-            const sentComment = [];
+            const sentCommentIDs = [];
             const subscription = this.clients.get(client.id);
-            chain.map(block => {
-              sentFeedIDs.map(sentFeedId => {
-                if (block.data.type == "comment" && block.data.feedId == sentFeedId) {
-                  const commentID = `${block.data.feedId}-${block.data.created}`;
-                  if (!sentComment.includes(commentID)){
-                    sentComment.push(commentID);
-                    this.ship(subscription.connection, {
-                      type: "comment_load_promise",
-                      data: block.data
-                    });
+            if (subscription) {
+              chain.map(block => {
+                sentFeedIDs.map(sentFeedId => {
+                  if (block.data.type == "comment" && block.data.feedId == sentFeedId) {
+                    const commentID = `${block.data.feedId}-${block.data.created}`;
+                    if (!sentCommentIDs.includes(commentID)){
+                      sentCommentIDs.push(commentID);
+                      this.ship(subscription.connection, {
+                        type: "comment_load_promise",
+                        data: block.data
+                      });
+                    }
                   }
-                }
-              })
-            });
+                });
+              });
+            }
             break;
           }
           default:

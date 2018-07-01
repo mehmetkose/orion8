@@ -234,6 +234,12 @@ arr-flatten@^1.0.1, arr-flatten@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/arr-flatten/-/arr-flatten-1.1.0.tgz#36048bbff4e7b47e136644316c99669ea5ae91f1"
 
+arr-includes@fupio/arr-includes:
+  version "2.0.3"
+  resolved "https://codeload.github.com/fupio/arr-includes/tar.gz/be37517dd4c60c7fc9b43e3d0540d64fbb18801a"
+  dependencies:
+    arrify "^1.0.1"
+
 arr-union@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/arr-union/-/arr-union-3.1.0.tgz#e39b09aea9def866a8f206e288af63919bae39c4"
