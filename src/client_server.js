@@ -2,7 +2,7 @@ import WebSocket from "ws";
 import Log from "log";
 import UrlParser from "url-parse";
 import { decodeToken /* TokenVerifier */ } from "jsontokens";
-import arrIncludes from "arr-includes";
+import includes from "arr-includes";
 
 const log = new Log("info");
 
@@ -48,7 +48,7 @@ class ClientServer {
     ws.on("message", data => {
       try {
         const message = JSON.parse(data);
-        log.info(`Received message: ${JSON.stringify(message)}`);
+        // log.info(`Received message: ${JSON.stringify(message)}`);
         switch (message.type) {
           case "get_blockchain": {
             ws.send(JSON.stringify(this.responseChainMsg()));
@@ -121,7 +121,6 @@ class ClientServer {
               created: message.data.created,
               updated: message.data.created
             };
-
             const subscribeList = this.subscriptions.get(comment.feedId);
             if (subscribeList) {
               subscribeList.forEach(clientId => {
@@ -142,7 +141,6 @@ class ClientServer {
           }
           case "follow_tag": {
             const tag = message.data.name.toLowerCase().trim();
-            console.log("followed", tag);
             if (!this.subscriptions.has(tag)) {
               this.subscriptions.set(tag, new Set());
             }
@@ -158,12 +156,20 @@ class ClientServer {
             break;
           }
           case "load_feeds": {
-            let sentFeedIDs = [];
+            const sentFeedIDs = [];
+            const page = parseInt(message.data.page) || 0;
+            const limit = 25;
+            const next = page * limit;
             const askedTags = message.data.tags;
             const chain = this.blockchain.getBlockChain();
-            chain.map(block => {
-              if (block.data.hasOwnProperty("tags") && block.index !== 0) {
-                if (arrIncludes(block.data.tags, askedTags) !== false) {
+            const checkClient = this.clients.get(client.id);
+            if (checkClient) {
+              chain
+                .slice(1) // skip the genesis
+                .filter(b => b.data.type == "feed" && includes(b.data.tags, askedTags) !== false)
+                .reverse()
+                .splice(next, next + limit)
+                .map(block => {
                   const feed = {
                     username: block.data.username,
                     identity: block.data.identity,
@@ -171,17 +177,13 @@ class ClientServer {
                     created: block.data.created,
                     updated: block.data.created
                   };
-                  const checkClient = this.clients.get(client.id);
-                  if (checkClient) {
-                    this.ship(checkClient.connection, {
-                      type: "feed_load_promise",
-                      data: feed
-                    });
-                    sentFeedIDs.push(`${feed.created}-${feed.identity}`)
-                  }
-                }
-              }
-            });
+                  this.ship(checkClient.connection, {
+                    type: "feed_load_promise",
+                    data: feed
+                  });
+                  sentFeedIDs.push(`${feed.created}-${feed.identity}`);
+                });
+            }
             // kullanıcı feed idlerini de etiket olarak takip etmeli
             // TODO: burada feedkey başına feed:{feedKey} eklenebilir.
             sentFeedIDs.forEach(feedKey => {
@@ -192,22 +194,50 @@ class ClientServer {
             });
             // chain'i tekrar tarayıp commentleri yolla.
             const sentCommentIDs = [];
+            // TODO: client objesinde connection vardır bence niye onu kullanmıyoruz?
             const subscription = this.clients.get(client.id);
             if (subscription) {
-              chain.map(block => {
-                sentFeedIDs.map(sentFeedId => {
-                  if (block.data.type == "comment" && block.data.feedId == sentFeedId) {
-                    const commentID = `${block.data.feedId}-${block.data.created}`;
-                    if (!sentCommentIDs.includes(commentID)){
-                      sentCommentIDs.push(commentID);
-                      this.ship(subscription.connection, {
-                        type: "comment_load_promise",
-                        data: block.data
-                      });
+              chain
+                .slice(1) // skip the genesis
+                .filter(x => x.data.type == "comment")
+                .map(block => {
+                  sentFeedIDs.map(sentFeedId => {
+                    if (block.data.feedId == sentFeedId) {
+                      const commentID = `${block.data.feedId}-${block.data.created}`;
+                      if (!sentCommentIDs.includes(commentID)) {
+                        sentCommentIDs.push(commentID);
+                        this.ship(subscription.connection, {
+                          type: "comment_load_promise",
+                          data: block.data
+                        });
+                      }
                     }
-                  }
+                  });
                 });
-              });
+            }
+            // the wall only need to be sorted at the beginning.
+            this.ship(subscription.connection, {type: "sort_wall"});
+            break;
+          }
+          case "popular_tags": {
+            const chain = this.blockchain.getBlockChain();
+            const checkClient = this.clients.get(client.id);
+            let suggestedTags = [];
+            if (checkClient) {
+              chain
+                .slice(1)
+                .filter(x => x.data.type == "feed")
+                .map(block => {
+                  this.unique(block.data.tags).map(tag => {
+                    if (!(tag in suggestedTags)) {
+                      this.ship(checkClient.connection, {
+                        type: "tag_suggestion",
+                        data: tag
+                      });
+                      suggestedTags.push(tag);
+                    }
+                  })
+                });
             }
             break;
           }
