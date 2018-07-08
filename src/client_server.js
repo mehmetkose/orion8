@@ -220,24 +220,21 @@ class ClientServer {
             break;
           }
           case "popular_tags": {
-            const chain = this.blockchain.getBlockChain();
+            const suggestedTags = [];
+            const query = this.blockchain.getBlockChain().slice(1).filter(x => x.data.type == "feed");
             const checkClient = this.clients.get(client.id);
-            let suggestedTags = [];
             if (checkClient) {
-              chain
-                .slice(1)
-                .filter(x => x.data.type == "feed")
-                .map(block => {
-                  this.unique(block.data.tags).map(tag => {
-                    if (!(tag in suggestedTags)) {
-                      this.ship(checkClient.connection, {
-                        type: "tag_suggestion",
-                        data: tag
-                      });
-                      suggestedTags.push(tag);
-                    }
-                  })
-                });
+              query.map(block => {
+                this.unique(block.data.tags).map(tag => {
+                  if (!(tag in suggestedTags) && (suggestedTags.length < 40)) {
+                    this.ship(checkClient.connection, {
+                      type: "tag_suggestion",
+                      data: tag
+                    });
+                    suggestedTags.push(tag);
+                  }
+                })
+              });
             }
             break;
           }
