@@ -158,7 +158,7 @@ class ClientServer {
           case "load_feeds": {
             const sentFeedIDs = [];
             const page = parseInt(message.data.page) || 0;
-            const limit = 25;
+            const limit = 15;
             const next = page * limit;
             const askedTags = message.data.tags.map(tag => tag.toLowerCase());
             const chain = this.blockchain.getBlockChain();
@@ -228,19 +228,21 @@ class ClientServer {
           }
           case "popular_tags": {
             const suggestedTags = [];
-            const query = this.blockchain.getBlockChain().slice(1).filter(x => x.data.type == "feed");
+            const query = this.blockchain.getBlockChain()
+              .slice(1).filter(x => x.data.type == "feed");
             const checkClient = this.clients.get(client.id);
             if (checkClient) {
               query.map(block => {
                 this.unique(block.data.tags).map(tag => {
+                  const lowerTag = tag.toLowerCase();
                   if (!(tag in suggestedTags) && (suggestedTags.length < 40)) {
                     this.ship(checkClient.connection, {
                       type: "tag_suggestion",
-                      data: tag
+                      data: lowerTag
                     });
-                    suggestedTags.push(tag);
+                    suggestedTags.push(lowerTag);
                   }
-                })
+                });
               });
             }
             break;
