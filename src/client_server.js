@@ -160,13 +160,20 @@ class ClientServer {
             const page = parseInt(message.data.page) || 0;
             const limit = 25;
             const next = page * limit;
-            const askedTags = message.data.tags;
+            const askedTags = message.data.tags.map(tag => tag.toLowerCase());
             const chain = this.blockchain.getBlockChain();
             const checkClient = this.clients.get(client.id);
             if (checkClient) {
               chain
                 .slice(1) // skip the genesis
-                .filter(b => b.data.type == "feed" && includes(b.data.tags, askedTags) !== false)
+                .filter(
+                  b =>
+                    b.data.type == "feed" &&
+                    includes(
+                      b.data.tags.map(tag => tag.toLowerCase()),
+                      askedTags
+                    ) !== false
+                )
                 .reverse()
                 .splice(next, next + limit)
                 .map(block => {
