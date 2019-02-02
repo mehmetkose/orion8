@@ -1,27 +1,27 @@
-import fs from "fs";
-import os from "os";
-import program from "commander";
-import colors from "colors";
-import Log from "log";
+require('dotenv').config();
+const asyncHandler = require('express-async-handler');
 
-import blockchain from "./blockchain";
-import ClientServer from "./client_server";
+import express from "express";
+import http from "http";
+import cors from "cors";
 
-const log = new Log("info");
 
-program.option("run", "run the server");
-program.option("-c --client_port [client_port]", "ws server port", 38746); // FUPIO
-program.option("-p --p2p_port [p2p_port]", "p2p server port", 24246); // CHAIN
-program.version("0.1.0");
-program.parse(process.argv);
+import Blockchain from "./blockchain";
+import ClientServer from "./client";
 
-if (program.run) {
-  const chainDir =  `${os.homedir()}/.orion8`;
-  !fs.existsSync(chainDir) && fs.mkdirSync(chainDir);
-  const orionChain = new blockchain.Chain(chainDir);
-  const clientWebsocketServer = new ClientServer(orionChain);
-  clientWebsocketServer.startServer(program.client_port);
-  log.info(`listening client ws server port on: ${program.client_port}`);
-} else if (!process.argv.slice(2).length) {
-  program.outputHelp(txt => colors.red(txt));
-}
+const orionChain = new Blockchain.Chain();
+
+const app = express();
+const server = http.createServer(app);
+
+app.use(cors());
+app.get('/', asyncHandler(async (req, res, next) => res.json(orionChain.getLatestBlock())))
+app.get('/chain', asyncHandler(async (req, res, next) => res.json(orionChain.getBlockChain())))
+app.get('/health', asyncHandler(async (req, res, next) => res.json({valid: orionChain.isChainValid()})))
+
+const port = process.env.PORT || 5000;
+server.listen(port)
+
+const clientWebsocketServer = new ClientServer(orionChain);
+clientWebsocketServer.startServer(server);
+console.log(`listening client ws server port on: ${port}`);

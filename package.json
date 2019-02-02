@@ -1,92 +1,56 @@
 {
-  "name": "orion8",
-  "version": "0.0.1",
-  "description": "A blockchain database for BlockStack projects to keep relations on a trustable network which uses Websockets for p2p communication. ",
-  "license": "MIT",
-  "repository": "mehmetkose/orion8",
-  "main": "dist/index.js",
-  "bin": {
-    "orion8": "dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "author": {
-    "name": "Mehmet Kose",
-    "email": "mehmetkose122@gmail.com",
-    "url": "https://github.com/mehmetkose"
-  },
-  "engines": {
-    "node": ">=6"
-  },
-  "scripts": {
-    "test": "jest",
-    "coverage": "npm test -- --coverage",
-    "postcoverage": "opn coverage/lcov-report/index.html",
-    "lint": "eslint src test",
-    "flow": "flow check",
-    "docs": "documentation readme src --section=API",
-    "clean": "rimraf dist",
-    "flowbuild": "flow-copy-source src dist",
-    "prebuild": "npm run docs && npm run clean && npm run flowbuild",
-    "dev": "nodemon dist/ run",
-    "build": "babel src -d dist",
-    "watch": "npm-watch",
-    "patch": "npm version patch && npm publish",
-    "minor": "npm version minor && npm publish",
-    "major": "npm version major && npm publish",
-    "prepublishOnly": "npm run lint && npm test && npm run build",
-    "postpublish": "git push origin master --follow-tags",
-    "compile": "npm run clean && npm run -s build && nexe dist/ -o compile/${npm_package_name}_${npm_package_version}"
-  },
-  "watch": {
-    "test": "{src,test}/*.js",
-    "lint": "{src,test}/*.js",
-    "build": "src"
-  },
-  "jest": {
-    "testEnvironment": "node"
-  },
-  "keywords": [
-    "orion8"
-  ],
-  "dependencies": {
-    "arr-includes": "fupio/arr-includes",
-    "colors": "^1.3.0",
-    "commander": "^2.15.1",
-    "crypto-js": "^3.1.9-1",
-    "jsonfile": "^4.0.0",
-    "jsontokens": "^0.7.8",
-    "log": "^1.4.0",
-    "url-parse": "^1.4.0",
-    "ws": "^5.2.0"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.2",
-    "babel-jest": "^22.4.3",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-flow": "^6.23.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "documentation": "^6.1.0",
-    "escape-string-regexp": "^1.0.5",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-flowtype": "^2.46.1",
-    "eslint-plugin-flowtype-errors": "^3.5.1",
-    "eslint-plugin-import": "^2.10.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "flow-bin": "^0.69.0",
-    "flow-copy-source": "^1.3.0",
-    "jest-cli": "^22.4.3",
-    "mock-socket": "^7.1.0",
-    "nodemon": "^1.17.5",
-    "npm-watch": "^0.3.0",
-    "opn-cli": "^3.1.0",
-    "prettier": "^1.11.1",
-    "rimraf": "^2.6.2",
-    "sockette": "^2.0.0"
-  }
+	"name": "orion8",
+	"version": "0.4.0",
+	"main": "src/index.js",
+	"scripts": {
+		"test": "jest",
+		"server": "nodemon src/index.js --exec babel-node",
+		"heroku-postbuild": "npm install",
+		"deploy": "git push heroku master && npm run tail",
+		"tail": "heroku logs --tail",
+		"dev": "nodemon --exec babel-node src/"
+	},
+	"license": "MIT",
+	"repository": "fupio/orion8",
+	"author": {
+		"name": "Mehmet Kose",
+		"email": "mehmetkosedev@gmail.com",
+		"url": "https://github.com/mehmetkose"
+	},
+	"jest": {
+		"testEnvironment": "node"
+	},
+	"keywords": [
+		"orion",
+		"orion8",
+		"blockstack",
+		"blockchain",
+		"social network"
+	],
+	"dependencies": {
+		"axios": "^0.18.0",
+		"babel": "^6.23.0",
+		"babel-cli": "^6.26.0",
+		"babel-preset-env": "1.6.0",
+		"babel-preset-es2015": "^6.24.1",
+		"babel-preset-stage-0": "^6.24.1",
+		"cors": "2.8.3",
+		"crypto-js": "^3.1.9-1",
+		"dotenv": "^6.2.0",
+		"express": "4.16.4",
+		"express-async-handler": "^1.1.4",
+		"http": "0.0.0",
+		"https": "1.0.0",
+		"jsonfile": "^5.0.0",
+		"jsontokens": "^1.0.0",
+		"lodash": "4.17.5",
+		"path": "0.12.7",
+		"url-parse": "^1.4.4",
+		"ws": "^6.1.2",
+		"nodemon": "^1.18.9"
+	},
+	"devDependencies": {
+		"babel-jest": "^23.6.0",
+		"jest-cli": "^23.6.0"
+	}
 }

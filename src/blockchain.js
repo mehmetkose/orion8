@@ -1,5 +1,6 @@
 import SHA256 from "crypto-js/sha256";
 import jsonfile from "jsonfile";
+const axios = require('axios');
 
 class Block {
   constructor(index, timestamp, previousHash, data) {
@@ -12,56 +13,63 @@ class Block {
   calculateHash = () => {
     return SHA256(
       this.index +
-        this.timestamp +
-        this.previousHash +
-        JSON.stringify(this.data)
+      this.timestamp +
+      this.previousHash +
+      JSON.stringify(this.data)
     ).toString();
   }
 }
 
 class Chain {
-  constructor(chainDir) {
-    this.fileName = `${chainDir}/blockchain.db`;
-    this.latestBlock = this.setupDatabase();
+  constructor() {
+    this.fileName = "blockchain.db";
+    this.setupDatabase();
   }
   setupDatabase = () => {
-    const schema = {
-      chain: [this.createGenesisBlock()],
-      cache: {}
-    };
-    try {
-      const database = jsonfile.readFileSync(this.fileName);
-      return database.chain[database.chain.length - 1];
-    } catch (error) {
-      if (error.errno == -2) {
-        jsonfile.writeFileSync(this.fileName, schema);
-      }
-      return schema.chain[0];
-    }
+    jsonfile.readFile(this.fileName)
+    .catch(_error => {
+      let schema = {chain: [this.createGenesisBlock()]};
+      axios.get("https://pulsar8.herokuapp.com/chain").then(response => {
+        console.log("axios geldi")
+        if(response && response.data) {
+          console.log("iki geldi mi")
+          schema = response.data
+          console.log(schema)
+        }
+        console.log(schema)
+        jsonfile.writeFile(this.fileName, schema, (err) => err && console.log(err));
+      })
+    })
   }
   createBlock = (index, timestamp, previousHash, data) => {
     return new Block(index, timestamp, previousHash, data);
-  };
-  createGenesisBlock = () => this.createBlock(0, Date.now(), "0", {type: "genesis", data: {}});
+  }
+  createGenesisBlock = () => this.createBlock(0, Date.now(), "0", {type: "genesis", data: {}})
   addBlock = (newBlock) => {
-    const database = jsonfile.readFileSync(this.fileName);
-    database.chain.push(newBlock);
-    jsonfile.writeFileSync(this.fileName, database);
-    this.latestBlock = database.chain[database.chain.length -1];
-    return true;
-  };
+    if (newBlock) {
+      const database = this.getBlockChain();
+      database.push(newBlock);
+      jsonfile.writeFileSync(this.fileName, database);
+      return true;
+    }
+    return false;
+  }
+  getLatestBlock = () => {
+    let database = this.getBlockChain();
+    return database.pop();
+  }
   getBlockChain = () => {
-    const database = jsonfile.readFileSync(this.fileName);
-    return database.chain;
+    return jsonfile.readFileSync(this.fileName)
   }
   generateNextBlock = blockData => {
-    const index = this.latestBlock.index + 1;
+    const latest = this.getLatestBlock();
+    const index = latest.index + 1;
     const timestamp = Date.now();
-    const previousHash = this.latestBlock.hash;
+    const previousHash = latest.hash;
     return new Block(index, timestamp, previousHash, blockData);
-  };
+  }
   isChainValid() {
-    const database = jsonfile.readFileSync(this.fileName);
+    const database = this.getBlockChain();
     for (let i = 1; i < database.chain.length; i += 1) {
       const currentBlock = this.createBlock(
         database.chain[i].index,

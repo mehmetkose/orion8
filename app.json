@@ -1,0 +1,7 @@
+{
+  "name": "Orion8",
+  "description": "A blockchain database for BlockStack projects to keep relations on a trustable network which uses Websockets for p2p communication.",
+  "repository": "https://github.com/fupio/orion8",
+  "logo": "https://raw.githubusercontent.com/fupio/orion8/master/orion8-logo.png",
+  "keywords": ["orion8", "blockchain", "websocket","nodejs"]
+}
