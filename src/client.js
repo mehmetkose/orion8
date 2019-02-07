@@ -78,7 +78,7 @@ class ClientServer {
               type: "feed",
               username: message.data.username,
               identity: client.blockstack,
-              tags: this.unique(message.data.tags),
+              tags: this.unique(message.data.tags).map(tag => tag.toLowerCase()),
               created: message.data.created
             };
             feed.tags.map(tagRaw => {
@@ -123,7 +123,6 @@ class ClientServer {
               text: message.data.text,
               created: message.data.created
             };
-
             const subscribeList = this.subscriptions.get(comment.feedId);
             if (subscribeList) {
               subscribeList.forEach(clientId => {
